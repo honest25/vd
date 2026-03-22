@@ -13,7 +13,6 @@ load_dotenv()
 
 app = FastAPI(title="Veo 3.1 Fast API")
 
-# Allow your GitHub Pages frontend to communicate securely
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
@@ -22,7 +21,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Setup exact model
 MODEL = "veo-3.1-fast-generate-preview"
 client = genai.Client(
     http_options={"api_version": "v1beta"},
@@ -36,33 +34,38 @@ async def health_check():
 @app.post("/generate-video")
 async def generate_video(
     prompt: str = Form(...),
-    duration: int = Form(5),
+    duration: int = Form(5), # Default to 5
     resolution: str = Form("720p"),
-    # Keeping these so the HTML form doesn't break, but we are doing pure text-to-video for now
     startFrame: UploadFile = File(None), 
     endFrame: UploadFile = File(None)
 ):
     try:
-        print(f"Starting generation for prompt: {prompt}")
+        # --- CRITICAL FIX: The Safety Clamp ---
+        # Ensure duration is ALWAYS exactly between 4 and 8.
+        safe_duration = int(duration)
+        if safe_duration < 4 or safe_duration > 8:
+            print(f"Warning: Received invalid duration {safe_duration}. Defaulting to 5.")
+            safe_duration = 5 
+            
+        print(f"Starting generation... Prompt: '{prompt}', Duration: {safe_duration}s")
         
         # 1. Video Config
         video_config = types.GenerateVideosConfig(
             person_generation="allow_all", 
             aspect_ratio="16:9",
             number_of_videos=1,
-            duration_seconds=int(duration),
+            duration_seconds=safe_duration, # Using the bulletproof duration
             resolution=resolution,
         )
 
         # 2. Call the Model
-        # CRITICAL FIX: We removed "VideoGenerationSource". You just pass 'prompt=prompt' directly!
         operation = client.models.generate_videos(
             model=MODEL,
             prompt=prompt,
             config=video_config,
         )
 
-        # 3. Wait for the video to be generated (Polling loop)
+        # 3. Wait for the video to be generated
         while not operation.done:
             print("Video has not been generated yet. Check again in 10 seconds...")
             time.sleep(10)
