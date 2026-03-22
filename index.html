@@ -3,508 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Veo Studio | Cinematic AI Video</title>
+    <title>Veo Studio | Cinematic AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #030712;
-            color: #f8fafc;
-            overflow-x: hidden;
-        }
-
-        /* Animated Gradient Background */
-        .animated-bg {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: -1;
-            background: radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15), transparent 25%),
-                        radial-gradient(circle at 85% 30%, rgba(147, 51, 234, 0.15), transparent 25%);
-            filter: blur(80px);
-            animation: pulse 10s ease-in-out infinite alternate;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.8; }
-            100% { transform: scale(1.1); opacity: 1; }
-        }
-
-        /* Glassmorphism Utilities */
+        body { background-color: #030712; color: #f8fafc; }
         .glass-panel {
-            background: rgba(17, 24, 39, 0.6);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-        }
-
-        .glass-input {
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
         }
-        
-        .glass-input:focus {
-            border-color: rgba(99, 102, 241, 0.5);
-            box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
-            outline: none;
-        }
-
-        /* Upload Area */
-        .upload-zone {
-            border: 2px dashed rgba(255, 255, 255, 0.15);
-            transition: all 0.3s ease;
-        }
-        .upload-zone:hover, .upload-zone.dragover {
-            border-color: #6366f1;
-            background: rgba(99, 102, 241, 0.05);
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #030712; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
-        
-        /* Progress Bar Animation */
-        .progress-stripe {
-            background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
-            background-size: 1rem 1rem;
-            animation: stripes 1s linear infinite;
-        }
-        @keyframes stripes {
-            from { background-position: 1rem 0; }
-            to { background-position: 0 0; }
-        }
+        .upload-zone { border: 2px dashed rgba(255, 255, 255, 0.2); transition: all 0.3s ease; }
+        .upload-zone:hover { border-color: #6366f1; background: rgba(99, 102, 241, 0.05); }
     </style>
 </head>
-<body class="antialiased min-h-screen flex flex-col items-center py-12 px-4">
-    
-    <div class="animated-bg"></div>
+<body class="min-h-screen flex flex-col items-center py-12 px-4 bg-gradient-to-br from-gray-900 to-black">
 
-    <main class="w-full max-w-5xl space-y-8">
-        <header class="text-center space-y-2">
-            <h1 class="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">
-                Veo Studio
-            </h1>
-            <p class="text-gray-400 text-sm">Cinematic AI Video Synthesis</p>
+    <main class="w-full max-w-4xl space-y-8">
+        <header class="text-center">
+            <h1 class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">Veo Studio</h1>
+            <p class="text-gray-400 mt-2">Cinematic Video Synthesis Pipeline</p>
         </header>
 
-        <div class="glass-panel rounded-2xl p-8 space-y-8 relative overflow-hidden">
+        <form id="video-form" class="glass-panel rounded-2xl p-8 space-y-6">
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
-                    <label class="text-sm font-medium text-gray-300 flex items-center gap-2">
-                        <i class="fa-solid fa-image"></i> Start Frame
-                    </label>
-                    <div id="start-dropzone" class="upload-zone rounded-xl h-48 flex flex-col items-center justify-center cursor-pointer relative overflow-hidden group">
-                        <input type="file" id="start-upload" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                        <div id="start-placeholder" class="text-center text-gray-500 group-hover:text-gray-300 transition-colors">
-                            <i class="fa-solid fa-cloud-arrow-up text-3xl mb-2"></i>
-                            <p class="text-sm">Click or drag image</p>
+                    <label class="text-sm font-medium text-gray-300"><i class="fa-solid fa-image"></i> Start Frame</label>
+                    <div class="upload-zone rounded-xl h-40 flex items-center justify-center relative overflow-hidden">
+                        <input type="file" id="startFrame" accept="image/*" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                        <div id="start-placeholder" class="text-center text-gray-500">
+                            <i class="fa-solid fa-upload text-2xl"></i><p class="text-xs mt-2">Upload Image</p>
                         </div>
-                        <img id="start-preview" class="absolute inset-0 w-full h-full object-cover hidden" alt="Start Frame">
+                        <img id="start-preview" class="absolute inset-0 w-full h-full object-cover hidden">
                     </div>
                 </div>
 
                 <div class="space-y-2">
-                    <label class="text-sm font-medium text-gray-300 flex items-center gap-2">
-                        <i class="fa-solid fa-image text-purple-400"></i> End Frame
-                    </label>
-                    <div id="end-dropzone" class="upload-zone rounded-xl h-48 flex flex-col items-center justify-center cursor-pointer relative overflow-hidden group">
-                        <input type="file" id="end-upload" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                        <div id="end-placeholder" class="text-center text-gray-500 group-hover:text-gray-300 transition-colors">
-                            <i class="fa-solid fa-cloud-arrow-up text-3xl mb-2"></i>
-                            <p class="text-sm">Click or drag image</p>
+                    <label class="text-sm font-medium text-gray-300"><i class="fa-solid fa-image text-purple-400"></i> End Frame</label>
+                    <div class="upload-zone rounded-xl h-40 flex items-center justify-center relative overflow-hidden">
+                        <input type="file" id="endFrame" accept="image/*" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                        <div id="end-placeholder" class="text-center text-gray-500">
+                            <i class="fa-solid fa-upload text-2xl"></i><p class="text-xs mt-2">Upload Image</p>
                         </div>
-                        <img id="end-preview" class="absolute inset-0 w-full h-full object-cover hidden" alt="End Frame">
+                        <img id="end-preview" class="absolute inset-0 w-full h-full object-cover hidden">
                     </div>
                 </div>
             </div>
 
             <div class="space-y-2">
-                <label class="text-sm font-medium text-gray-300 flex items-center gap-2">
-                    <i class="fa-solid fa-pen-nib"></i> Scene Description
-                </label>
-                <textarea id="prompt-input" rows="3" class="w-full glass-input rounded-xl p-4 text-sm text-gray-100 placeholder-gray-500 resize-none" placeholder="Describe the motion and transformation between the frames (e.g., 'A dramatic dolly zoom through the neon-lit cyberpunk alleyway, raining heavily...')"></textarea>
+                <label class="text-sm font-medium text-gray-300"><i class="fa-solid fa-pen-nib"></i> Scene Prompt</label>
+                <textarea id="prompt" required rows="3" class="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-sm text-white focus:border-indigo-500 outline-none transition-colors" placeholder="Describe the cinematic motion..."></textarea>
             </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-black/20 p-4 rounded-xl border border-white/5">
-                <div class="space-y-1">
-                    <label class="text-xs text-gray-400">Duration</label>
-                    <select id="setting-duration" class="w-full glass-input rounded-lg p-2 text-sm text-white appearance-none">
-                        <option value="5">5 Seconds</option>
-                        <option value="8">8 Seconds</option>
-                    </select>
-                </div>
-                <div class="space-y-1">
-                    <label class="text-xs text-gray-400">Resolution</label>
-                    <select id="setting-resolution" class="w-full glass-input rounded-lg p-2 text-sm text-white appearance-none">
-                        <option value="720">720p (HD)</option>
-                        <option value="1080">1080p (FHD)</option>
-                    </select>
-                </div>
-                <div class="space-y-1">
-                    <label class="text-xs text-gray-400">FPS</label>
-                    <select id="setting-fps" class="w-full glass-input rounded-lg p-2 text-sm text-white appearance-none">
-                        <option value="24">24 (Cinematic)</option>
-                        <option value="30">30 (Standard)</option>
-                        <option value="60">60 (Smooth)</option>
-                    </select>
-                </div>
-                <div class="space-y-1">
-                    <label class="text-xs text-gray-400">Style Preset</label>
-                    <select id="setting-style" class="w-full glass-input rounded-lg p-2 text-sm text-white appearance-none">
-                        <option value="cinematic">Cinematic</option>
-                        <option value="realistic">Ultra Realistic</option>
-                        <option value="anime">Anime / Cel Shaded</option>
-                        <option value="horror">Dark / Horror</option>
-                    </select>
-                </div>
-                <div class="col-span-2 md:col-span-4 flex items-center gap-4 mt-2">
-                    <label class="text-xs text-gray-400 whitespace-nowrap">Motion Intensity</label>
-                    <input type="range" id="setting-motion" min="1" max="10" value="5" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-indigo-500">
-                </div>
+            <div class="grid grid-cols-2 gap-4">
+                <select id="duration" class="bg-black/50 border border-white/10 rounded-xl p-3 text-sm text-white outline-none">
+                    <option value="5">5 Seconds</option>
+                    <option value="8">8 Seconds</option>
+                </select>
+                <select id="resolution" class="bg-black/50 border border-white/10 rounded-xl p-3 text-sm text-white outline-none">
+                    <option value="720p">720p HD</option>
+                    <option value="1080p">1080p FHD</option>
+                </select>
             </div>
 
-            <button id="btn-generate" class="w-full py-4 rounded-xl font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 transition-all transform hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-indigo-500/25 flex justify-center items-center gap-2">
-                <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Cinematic Video
+            <button type="submit" id="submit-btn" class="w-full py-4 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 transition-all shadow-lg flex justify-center items-center gap-2">
+                <i class="fa-solid fa-clapperboard"></i> Generate Video
             </button>
+        </form>
 
-            <div id="progress-overlay" class="absolute inset-0 bg-gray-900/90 backdrop-blur-sm z-20 flex flex-col items-center justify-center p-8 hidden">
-                <div class="w-full max-w-md space-y-6 text-center">
-                    <div class="relative w-20 h-20 mx-auto">
-                        <div class="absolute inset-0 border-4 border-indigo-500/20 rounded-full"></div>
-                        <div class="absolute inset-0 border-4 border-indigo-500 rounded-full border-t-transparent animate-spin"></div>
-                        <i class="fa-solid fa-video absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-indigo-400"></i>
-                    </div>
-                    
-                    <div class="space-y-2">
-                        <h3 id="progress-title" class="text-lg font-medium text-white">Initializing Engine...</h3>
-                        <p id="progress-desc" class="text-sm text-gray-400">Connecting to Google Veo Pipeline</p>
-                    </div>
-
-                    <div class="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
-                        <div id="progress-bar" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-full w-0 transition-all duration-300 progress-stripe"></div>
-                    </div>
-                </div>
-            </div>
+        <div id="loading" class="hidden glass-panel rounded-2xl p-8 text-center space-y-4">
+            <div class="animate-spin text-indigo-500 text-4xl"><i class="fa-solid fa-circle-notch"></i></div>
+            <h3 class="text-lg font-medium">Generating video using Veo...</h3>
+            <p class="text-sm text-gray-400">This usually takes a few minutes. Please wait.</p>
         </div>
 
-        <div id="output-section" class="glass-panel rounded-2xl p-8 space-y-6 hidden animate-fade-in">
-            <div class="flex items-center justify-between">
-                <h2 class="text-xl font-semibold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-film text-purple-400"></i> Generated Output
-                </h2>
-                <div class="flex gap-2">
-                    <button id="btn-replay" class="p-2 px-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-sm flex items-center gap-2">
-                        <i class="fa-solid fa-rotate-left"></i> Replay
-                    </button>
-                    <a id="btn-download" href="#" download="veo-output.webm" class="p-2 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-500 transition-colors text-sm flex items-center gap-2 shadow-lg shadow-indigo-500/20">
-                        <i class="fa-solid fa-download"></i> Download WEBM
-                    </a>
-                </div>
-            </div>
-            
-            <div class="relative aspect-video rounded-xl overflow-hidden bg-black border border-white/10 shadow-2xl">
-                <video id="output-video" class="w-full h-full object-cover" controls autoplay loop playsinline></video>
-            </div>
-            
-            <div class="bg-black/30 p-4 rounded-xl border border-white/5">
-                <p class="text-xs text-gray-400 font-mono">
-                    <span class="text-indigo-400">LOG:</span> Synthesized via Client-Side Engine (Veo API Mock). <br>
-                    <span class="text-indigo-400">PROMPT COMPILED:</span> <span id="debug-prompt"></span>
-                </p>
-            </div>
+        <div id="output" class="hidden glass-panel rounded-2xl p-6 space-y-4">
+            <h2 class="text-xl font-semibold flex items-center gap-2"><i class="fa-solid fa-check-circle text-green-400"></i> Generation Complete</h2>
+            <video id="result-video" class="w-full rounded-xl border border-white/10 bg-black aspect-video object-cover" controls autoplay loop playsinline></video>
+            <a id="download-btn" href="#" download="veo_cinematic.mp4" class="block text-center w-full py-3 rounded-xl bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">
+                <i class="fa-solid fa-download"></i> Download MP4
+            </a>
         </div>
     </main>
 
     <script>
-        /**
-         * --------------------------------------------------------
-         * VEO STUDIO - FRONTEND LOGIC & SYNTHESIS ENGINE
-         * --------------------------------------------------------
-         */
-
-        // State Management
-        const state = {
-            startImage: null,
-            endImage: null,
-            prompt: '',
-            config: {
-                duration: 5,
-                resolution: 720,
-                fps: 24,
-                style: 'cinematic',
-                motion: 5
-            }
-        };
-
-        // --- DOM Elements ---
-        const els = {
-            startUpload: document.getElementById('start-upload'),
-            startPreview: document.getElementById('start-preview'),
-            startPlaceholder: document.getElementById('start-placeholder'),
-            endUpload: document.getElementById('end-upload'),
-            endPreview: document.getElementById('end-preview'),
-            endPlaceholder: document.getElementById('end-placeholder'),
-            promptInput: document.getElementById('prompt-input'),
-            btnGenerate: document.getElementById('btn-generate'),
-            progressOverlay: document.getElementById('progress-overlay'),
-            progressTitle: document.getElementById('progress-title'),
-            progressDesc: document.getElementById('progress-desc'),
-            progressBar: document.getElementById('progress-bar'),
-            outputSection: document.getElementById('output-section'),
-            outputVideo: document.getElementById('output-video'),
-            btnDownload: document.getElementById('btn-download'),
-            btnReplay: document.getElementById('btn-replay'),
-            debugPrompt: document.getElementById('debug-prompt'),
-            // Settings
-            sDuration: document.getElementById('setting-duration'),
-            sResolution: document.getElementById('setting-resolution'),
-            sFps: document.getElementById('setting-fps'),
-            sStyle: document.getElementById('setting-style'),
-            sMotion: document.getElementById('setting-motion'),
-        };
-
-        // --- Event Listeners: Image Uploads ---
-        function handleImageUpload(inputEl, previewEl, placeholderEl, stateKey) {
-            inputEl.addEventListener('change', (e) => {
+        // Handle Image Previews
+        function setupPreview(inputId, previewId, placeholderId) {
+            document.getElementById(inputId).addEventListener('change', function(e) {
                 const file = e.target.files[0];
-                if (!file) return;
-                
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const base64 = event.target.result;
-                    state[stateKey] = base64;
-                    previewEl.src = base64;
-                    previewEl.classList.remove('hidden');
-                    placeholderEl.classList.add('hidden');
-                };
-                reader.readAsDataURL(file);
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.getElementById(previewId);
+                        img.src = e.target.result;
+                        img.classList.remove('hidden');
+                        document.getElementById(placeholderId).classList.add('hidden');
+                    }
+                    reader.readAsDataURL(file);
+                }
             });
         }
 
-        handleImageUpload(els.startUpload, els.startPreview, els.startPlaceholder, 'startImage');
-        handleImageUpload(els.endUpload, els.endPreview, els.endPlaceholder, 'endImage');
+        setupPreview('startFrame', 'start-preview', 'start-placeholder');
+        setupPreview('endFrame', 'end-preview', 'end-placeholder');
 
-        // --- Advanced Prompt Builder ---
-        function buildVeoPrompt() {
-            return `Create a cinematic video sequence.
-Scene: ${state.prompt || 'Seamless atmospheric transition.'}
-Requirements: Smooth transition from start frame to end frame. Cinematic camera motion (intensity: ${state.config.motion}/10). Consistent environment. Realistic lighting progression.
-Style: ${state.config.style}, high quality, 8k resolution.`;
-        }
+        // Handle Form Submission
+        document.getElementById('video-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-        // --- Update State from UI ---
-        function updateConfig() {
-            state.prompt = els.promptInput.value;
-            state.config.duration = parseInt(els.sDuration.value);
-            state.config.resolution = parseInt(els.sResolution.value);
-            state.config.fps = parseInt(els.sFps.value);
-            state.config.style = els.sStyle.value;
-            state.config.motion = parseInt(els.sMotion.value);
-        }
+            const formEl = document.getElementById('video-form');
+            const loadingEl = document.getElementById('loading');
+            const outputEl = document.getElementById('output');
+            const submitBtn = document.getElementById('submit-btn');
 
-        // --- Generate Button Click ---
-        els.btnGenerate.addEventListener('click', async () => {
-            if (!state.startImage || !state.endImage) {
-                alert("Please upload both Start and End frames.");
-                return;
-            }
-            
-            updateConfig();
-            els.outputSection.classList.add('hidden');
-            els.progressOverlay.classList.remove('hidden');
-            
-            const compiledPrompt = buildVeoPrompt();
-            els.debugPrompt.innerText = compiledPrompt;
+            // Build FormData
+            const formData = new FormData();
+            formData.append('prompt', document.getElementById('prompt').value);
+            formData.append('duration', document.getElementById('duration').value);
+            formData.append('resolution', document.getElementById('resolution').value);
+            formData.append('startFrame', document.getElementById('startFrame').files[0]);
+            formData.append('endFrame', document.getElementById('endFrame').files[0]);
+
+            // Update UI State
+            formEl.classList.add('opacity-50', 'pointer-events-none');
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            loadingEl.classList.remove('hidden');
+            outputEl.classList.add('hidden');
 
             try {
-                // Execute pipeline
-                const videoUrl = await generateWithVeo(compiledPrompt, state.config);
-                
-                // Show Output
-                els.outputVideo.src = videoUrl;
-                els.btnDownload.href = videoUrl;
-                els.outputSection.classList.remove('hidden');
-                els.outputSection.scrollIntoView({ behavior: 'smooth' });
-                
-            } catch (error) {
-                alert("Generation failed: " + error.message);
-            } finally {
-                els.progressOverlay.classList.add('hidden');
-                els.progressBar.style.width = '0%';
-            }
-        });
+                // Call FastAPI Backend
+                const response = await fetch('http://localhost:8000/generate-video', {
+                    method: 'POST',
+                    body: formData
+                });
 
-        els.btnReplay.addEventListener('click', () => {
-            els.outputVideo.currentTime = 0;
-            els.outputVideo.play();
-        });
-
-
-        /**
-         * --------------------------------------------------------
-         * API SIMULATION & SYNTHESIS ENGINE
-         * --------------------------------------------------------
-         * FUTURE BACKEND INTEGRATION:
-         * To connect to the real Python backend, replace the logic below with:
-         * * const response = await fetch('https://your-api.com/generate-video', {
-         * method: 'POST',
-         * headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
-         * body: JSON.stringify({
-         * prompt: compiledPrompt,
-         * startFrameBase64: state.startImage,
-         * endFrameBase64: state.endImage,
-         * config: state.config
-         * })
-         * });
-         * const data = await response.json();
-         * return data.videoUrl;
-         */
-
-        const API_KEY = "INSERT_KEY"; // Placeholder for future use
-
-        async function updateProgress(title, desc, percent, delayMs) {
-            els.progressTitle.innerText = title;
-            els.progressDesc.innerText = desc;
-            els.progressBar.style.width = `${percent}%`;
-            return new Promise(r => setTimeout(r, delayMs));
-        }
-
-        async function generateWithVeo(prompt, config) {
-            // Stage 1: API Simulation (Fake delay & logic)
-            await updateProgress("Analyzing Scene...", "Extracting depth maps and semantics", 15, 1500);
-            await updateProgress("Building Cinematic Motion...", `Applying ${config.style} style heuristics`, 35, 2000);
-            await updateProgress("Calling Veo API...", "Routing to model: veo-2.0-generate-001", 50, 1000);
-            
-            // SIMULATE API FAILURE -> TRIGGER FALLBACK
-            console.warn("Veo API mock call timed out. Engaging Frontend Video Synthesis Engine...");
-            await updateProgress("Rendering Final Output...", "Synthesizing frames locally (Fallback Engine)", 65, 500);
-
-            // Stage 2: Fallback Canvas Engine
-            return await runFallbackEngine(config);
-        }
-
-        function loadImage(src) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.crossOrigin = "anonymous";
-                img.onload = () => resolve(img);
-                img.onerror = reject;
-                img.src = src;
-            });
-        }
-
-        async function runFallbackEngine(config) {
-            // Setup offscreen canvas
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            
-            // Set dimensions based on resolution (16:9)
-            canvas.width = config.resolution === 1080 ? 1920 : 1280;
-            canvas.height = config.resolution === 1080 ? 1080 : 720;
-
-            const img1 = await loadImage(state.startImage);
-            const img2 = await loadImage(state.endImage);
-
-            // Setup MediaRecorder
-            const stream = canvas.captureStream(config.fps);
-            let mimeType = 'video/webm';
-            // Safari fallback
-            if (!MediaRecorder.isTypeSupported('video/webm')) {
-                mimeType = 'video/mp4'; 
-            }
-            
-            const recorder = new MediaRecorder(stream, { mimeType: mimeType });
-            const chunks = [];
-            recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-
-            return new Promise((resolve) => {
-                recorder.onstop = () => {
-                    const blob = new Blob(chunks, { type: mimeType });
-                    const url = URL.createObjectURL(blob);
-                    resolve(url);
-                };
-
-                recorder.start();
-
-                // Animation Variables
-                const durationMs = config.duration * 1000;
-                let startTime = null;
-                const motionFactor = 1 + (config.motion * 0.02); // 1.02 to 1.2 scale limit
-
-                // Draw Loop
-                function drawFrame(timestamp) {
-                    if (!startTime) startTime = timestamp;
-                    const elapsed = timestamp - startTime;
-                    const progress = Math.min(elapsed / durationMs, 1.0); // 0 to 1
-
-                    // Update UI Progress bar (mapping 65% to 100%)
-                    const uiProgress = 65 + (progress * 35);
-                    els.progressBar.style.width = `${uiProgress}%`;
-
-                    // Clear Canvas
-                    ctx.fillStyle = '#000';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                    // Easing function for smoother transition
-                    const easeProgress = progress < 0.5 
-                        ? 2 * progress * progress 
-                        : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-
-                    // Draw Image 1 (Fading out, Zooming in slightly)
-                    const scale1 = 1 + (progress * (motionFactor - 1));
-                    ctx.globalAlpha = 1 - easeProgress;
-                    drawImageCenteredAndScaled(ctx, img1, canvas.width, canvas.height, scale1);
-
-                    // Draw Image 2 (Fading in, Zooming out slightly)
-                    const scale2 = motionFactor - (progress * (motionFactor - 1));
-                    ctx.globalAlpha = easeProgress;
-                    drawImageCenteredAndScaled(ctx, img2, canvas.width, canvas.height, scale2);
-
-                    if (progress < 1.0) {
-                        requestAnimationFrame(drawFrame);
-                    } else {
-                        // Hold last frame for a fraction of a second, then stop
-                        setTimeout(() => recorder.stop(), 200); 
-                    }
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.detail || "Server error occurred");
                 }
 
-                requestAnimationFrame(drawFrame);
-            });
-        }
+                // Convert response to Blob (Video File)
+                const blob = await response.blob();
+                const videoUrl = URL.createObjectURL(blob);
 
-        // Helper to mimic 'object-fit: cover' on Canvas with scaling
-        function drawImageCenteredAndScaled(ctx, img, canvasWidth, canvasHeight, scale) {
-            const imgRatio = img.width / img.height;
-            const canvasRatio = canvasWidth / canvasHeight;
-            let drawWidth, drawHeight, offsetX, offsetY;
+                // Show Video
+                const videoEl = document.getElementById('result-video');
+                videoEl.src = videoUrl;
+                document.getElementById('download-btn').href = videoUrl;
+                
+                loadingEl.classList.add('hidden');
+                outputEl.classList.remove('hidden');
 
-            if (imgRatio > canvasRatio) {
-                drawHeight = canvasHeight;
-                drawWidth = canvasHeight * imgRatio;
-                offsetX = (canvasWidth - drawWidth) / 2;
-                offsetY = 0;
-            } else {
-                drawWidth = canvasWidth;
-                drawHeight = canvasWidth / imgRatio;
-                offsetX = 0;
-                offsetY = (canvasHeight - drawHeight) / 2;
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+                loadingEl.classList.add('hidden');
+            } finally {
+                // Restore UI State
+                formEl.classList.remove('opacity-50', 'pointer-events-none');
+                submitBtn.innerHTML = '<i class="fa-solid fa-clapperboard"></i> Generate Video';
             }
-
-            // Apply scaling from center
-            const scaledWidth = drawWidth * scale;
-            const scaledHeight = drawHeight * scale;
-            const scaledOffsetX = offsetX - (scaledWidth - drawWidth) / 2;
-            const scaledOffsetY = offsetY - (scaledHeight - drawHeight) / 2;
-
-            ctx.drawImage(img, scaledOffsetX, scaledOffsetY, scaledWidth, scaledHeight);
-        }
+        });
     </script>
 </body>
 </html>
