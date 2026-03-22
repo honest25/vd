@@ -22,7 +22,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Setup exact model from your script
+# Setup exact model
 MODEL = "veo-3.1-fast-generate-preview"
 client = genai.Client(
     http_options={"api_version": "v1beta"},
@@ -38,16 +38,16 @@ async def generate_video(
     prompt: str = Form(...),
     duration: int = Form(5),
     resolution: str = Form("720p"),
-    # We accept these just in case your HTML form sends them, but we IGNORE them.
+    # Keeping these so the HTML form doesn't break, but we are doing pure text-to-video for now
     startFrame: UploadFile = File(None), 
     endFrame: UploadFile = File(None)
 ):
     try:
         print(f"Starting generation for prompt: {prompt}")
         
-        # 1. Video Config (Matched to your script)
+        # 1. Video Config
         video_config = types.GenerateVideosConfig(
-            person_generation="allow_all", # Set to allow_all so human prompts don't fail
+            person_generation="allow_all", 
             aspect_ratio="16:9",
             number_of_videos=1,
             duration_seconds=int(duration),
@@ -55,19 +55,18 @@ async def generate_video(
         )
 
         # 2. Call the Model
+        # CRITICAL FIX: We removed "VideoGenerationSource". You just pass 'prompt=prompt' directly!
         operation = client.models.generate_videos(
             model=MODEL,
-            source=types.VideoGenerationSource(
-                prompt=prompt # PURE STRING, no lists or files!
-            ),
+            prompt=prompt,
             config=video_config,
         )
 
-        # 3. Wait for the video(s) to be generated (Polling loop)
+        # 3. Wait for the video to be generated (Polling loop)
         while not operation.done:
             print("Video has not been generated yet. Check again in 10 seconds...")
             time.sleep(10)
-            operation = client.operations.get(operation)
+            operation = client.operations.get(operation.name)
 
         result = operation.result
         if not result or not result.generated_videos:
@@ -77,7 +76,7 @@ async def generate_video(
         generated_video = result.generated_videos[0]
         output_filename = f"video_{uuid.uuid4()}.mp4"
         
-        print(f"Video generated: {generated_video.video.uri}")
+        print(f"Video generated! Downloading...")
         client.files.download(file=generated_video.video)
         generated_video.video.save(output_filename) 
 
