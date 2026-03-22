@@ -27,6 +27,9 @@ client = genai.Client(
     api_key=os.getenv("GEMINI_API_KEY"),
     http_options={"api_version": "v1beta"}
 )
+@app.get("/")
+def home():
+    return {"status": "API running ✅"}
 
 @app.post("/generate-video")
 async def generate_video(
